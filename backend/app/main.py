@@ -59,7 +59,7 @@ async def ephemerides(ids: str = Query(...), start: Optional[str] = None, end: O
         if not target:
             output[object_id] = {"points": [], "sourceStatus": "unavailable", "error": "Unknown object id"}
             return
-        key = f"parser-v3|{target}|{epoch.isoformat()}|{stop.isoformat()}|{step}|heliocentric-ecliptic-j2000"
+        key = f"parser-v4-tdb-utc|{target}|{epoch.isoformat()}|{stop.isoformat()}|{step}|heliocentric-ecliptic-j2000"
         cached = cache.get(key)
         if cached and not cached[1]:
             output[object_id] = {**cached[0], "sourceStatus": "cached"}

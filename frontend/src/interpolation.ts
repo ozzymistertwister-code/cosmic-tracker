@@ -1,6 +1,6 @@
 import { norm, type EphemerisPoint } from './domain'
 
-const epochMs = (point: EphemerisPoint) => point.epochTdb ? Date.parse(point.epochTdb) : Number.NaN
+const epochMs = (point: EphemerisPoint) => point.epochUtc ? Date.parse(point.epochUtc) : Number.NaN
 
 export function interpolateEphemeris(points: EphemerisPoint[], target: Date): EphemerisPoint | undefined {
   const usable = points

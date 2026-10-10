@@ -3,7 +3,7 @@ import { interpolateEphemeris } from './interpolation'
 import type { EphemerisPoint } from './domain'
 
 const point = (epochTdb: string, x: number): EphemerisPoint => ({
-  timestamp: epochTdb, epochTdb, x, y: 0, z: 0, vx: 10, vy: 0, vz: 0, source: 'fixture', coverage: 'reconstructed',
+  timestamp: epochTdb, epochTdb, epochUtc: epochTdb, x, y: 0, z: 0, vx: 10, vy: 0, vz: 0, source: 'fixture', coverage: 'reconstructed',
 })
 
 describe('Horizons state interpolation', () => {

@@ -4,7 +4,10 @@ from math import sqrt
 import re
 from typing import Dict, List, Union
 
+from astropy.time import Time
+
 AU_KM = 149_597_870.7
+COMPLETE_VECTOR_FIELDS = {"timestamp", "epoch_tdb", "epoch_utc", "x", "y", "z", "vx", "vy", "vz"}
 
 
 @dataclass(frozen=True)
@@ -19,6 +22,7 @@ class StateVector:
     source: str
     coverage: str = "unknown"
     epoch_tdb: str = ""
+    epoch_utc: str = ""
 
     @property
     def distance_km(self) -> float:
@@ -33,7 +37,6 @@ def parse_horizons_result(result: str, source: str) -> List[StateVector]:
     """Parse the documented Horizons $$SOE vector block."""
     if "$$SOE" not in result or "$$EOE" not in result:
         raise ValueError("Horizons response does not contain an ephemeris block")
-    coverage = "forecast" if "pred" in result.lower() else "reconstructed"
     points: List[StateVector] = []
     inside = False
     current: Dict[str, Union[float, str]] = {}
@@ -44,20 +47,23 @@ def parse_horizons_result(result: str, source: str) -> List[StateVector]:
             continue
         if line == "$$EOE":
             inside = False
-            if len(current) == 8:
-                points.append(StateVector(source=source, coverage=coverage, **current))
+            if COMPLETE_VECTOR_FIELDS.issubset(current):
+                points.append(StateVector(source=source, coverage="unknown", **current))
             current = {}
             continue
         if not inside:
             continue
         if " = A.D." in line:
-            if len(current) == 8:
-                points.append(StateVector(source=source, coverage=coverage, **current))
+            if COMPLETE_VECTOR_FIELDS.issubset(current):
+                points.append(StateVector(source=source, coverage="unknown", **current))
                 current = {}
             current["timestamp"] = line.split(" = ", 1)[0]
-            calendar = re.search(r"A\.D\. (\d{4}-[A-Za-z]{3}-\d{2} \d{2}:\d{2}:\d{2}\.\d+) TDB", line)
+            calendar = re.search(r"A\.D\. (\d{4}-[A-Za-z]{3}-\d{2} \d{2}:\d{2}:\d+\.\d+) TDB", line)
             if calendar:
-                current["epoch_tdb"] = datetime.strptime(calendar.group(1), "%Y-%b-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc).isoformat()
+                tdb_calendar = datetime.strptime(calendar.group(1), "%Y-%b-%d %H:%M:%S.%f")
+                tdb = Time(tdb_calendar.isoformat(" "), format="iso", scale="tdb")
+                current["epoch_tdb"] = tdb.isot
+                current["epoch_utc"] = f"{tdb.utc.isot}Z"
         else:
             matches = re.findall(r"\b(VX|VY|VZ|X|Y|Z)\s*=\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:E[+-]?\d+)?)", line)
             for key, value in matches:

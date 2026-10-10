@@ -1,6 +1,8 @@
 import httpx
-from typing import List
+from typing import List, Optional
 import asyncio
+from dataclasses import replace
+from datetime import datetime, timezone
 
 from app.domain import StateVector, parse_horizons_result
 
@@ -9,6 +11,15 @@ HORIZONS_URL = "https://ssd.jpl.nasa.gov/api/horizons.api"
 
 class HorizonsError(RuntimeError):
     pass
+
+
+def classify_coverage(point: StateVector, now: Optional[datetime] = None) -> str:
+    """Classify a parsed epoch explicitly; parser text is never used as a signal."""
+    if not point.epoch_utc:
+        return "unknown"
+    reference = now or datetime.now(timezone.utc)
+    epoch = datetime.fromisoformat(point.epoch_utc.replace("Z", "+00:00"))
+    return "forecast" if epoch > reference else "reconstructed"
 
 
 async def fetch_vectors(target_id: str, start: str, stop: str, step: str = "1 d") -> List[StateVector]:
@@ -30,13 +41,16 @@ async def fetch_vectors(target_id: str, start: str, stop: str, step: str = "1 d"
     body = response.json()
     if "error" in body or "result" not in body:
         raise HorizonsError(str(body.get("message", "Horizons returned no result")))
-    return parse_horizons_result(body["result"], "NASA/JPL Horizons")
+    points = parse_horizons_result(body["result"], "NASA/JPL Horizons")
+    now = datetime.now(timezone.utc)
+    classified = [replace(point, coverage=classify_coverage(point, now)) for point in points]
+    return classified
 
 
 def serialize_point(point: StateVector) -> dict:
     return {
         "timestamp": point.timestamp, "x": point.x, "y": point.y, "z": point.z,
         "vx": point.vx, "vy": point.vy, "vz": point.vz, "source": point.source,
-        "coverage": point.coverage, "epochTdb": point.epoch_tdb,
+        "coverage": point.coverage, "epochTdb": point.epoch_tdb, "epochUtc": point.epoch_utc,
     }
 

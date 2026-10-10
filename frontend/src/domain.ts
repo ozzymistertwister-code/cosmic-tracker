@@ -3,7 +3,7 @@ export type Mode = 'solar' | 'deep'
 export type Vector = { x: number; y: number; z: number }
 export type StateVector = Vector & { vx: number; vy: number; vz: number }
 export type EphemerisPoint = StateVector & {
-  timestamp: string; epoch?: number; epochTdb?: string; source: string; coverage: string;
+  timestamp: string; epoch?: number; epochTdb?: string; epochUtc?: string; source: string; coverage: string;
   path?: Array<{ x: number; y: number }>;
   interpolation?: 'sampled' | 'hermite';
   requestedEpochUtc?: string;

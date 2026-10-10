@@ -9,6 +9,15 @@ def test_parser_requires_and_reads_soe_block():
     points = parse_horizons_result(body, "offline fixture")
     assert points[0].x == 1.0 and points[0].vz == 6.0
     assert points[0].source == "offline fixture"
+    assert points[0].epoch_tdb == "2026-10-10T00:00:00.000"
+    assert points[0].epoch_utc == "2026-10-09T23:58:50.818Z"
+    assert points[0].coverage == "unknown"
+
+
+def test_parser_does_not_infer_coverage_from_arbitrary_text():
+    body = FIXTURE.replace("header", "prediction metadata is not a coverage field")
+    point = parse_horizons_result(body, "offline fixture")[0]
+    assert point.coverage == "unknown"
 
 
 def test_vector_math():

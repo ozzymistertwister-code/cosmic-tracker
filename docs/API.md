@@ -43,7 +43,7 @@
   "objects": {
     "earth": {
       "sourceStatus":"live",
-      "points":[{"timestamp":"JDTDB","epochTdb":"...","x":0,"y":0,"z":0,"vx":0,"vy":0,"vz":0,"source":"NASA/JPL Horizons","coverage":"reconstructed"}]
+      "points":[{"timestamp":"JDTDB","epochTdb":"2026-10-10T00:00:00.000","epochUtc":"2026-10-09T23:58:50.818Z","x":0,"y":0,"z":0,"vx":0,"vy":0,"vz":0,"source":"NASA/JPL Horizons","coverage":"unknown"}]
     }
   }
 }
