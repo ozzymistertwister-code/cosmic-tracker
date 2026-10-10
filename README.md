@@ -1,4 +1,4 @@
-# Cosmic Tracker v0.1.2
+# Cosmic Tracker v0.1.3
 
 Научно корректный русскоязычный атлас Солнечной системы и дальнего космоса. Положения планет и аппаратов получаются из NASA/JPL Horizons; интерфейс не подменяет эфемериды декоративной анимацией.
 
@@ -30,7 +30,7 @@ npm run dev
 
 ```bash
 cd frontend && npm run check && npm run build
-cd ../backend && source .venv/bin/activate && pytest
+PYTHONPATH=backend backend/.venv/bin/pytest -q
 ```
 
 ## Production layout
@@ -57,13 +57,13 @@ API_PREFIX=/cosmic-tracker/api uvicorn backend.app.main:app --host 127.0.0.1 --p
 
 VPS в этот этап не входит. Runbook для будущей публикации находится в `docs/DEPLOYMENT.md`: versioned release, healthcheck, smoke-проверка и переключение symlink с возможностью rollback.
 
-## Инженерный стандарт v0.1.2
+## Инженерный стандарт v0.1.3
 
 Cosmic Tracker разделён на React/Vite frontend, FastAPI backend, vector domain, Horizons adapter и SQLite cache. Frontend использует `base=/cosmic-tracker/`, backend — `API_PREFIX=/cosmic-tracker/api`; API должен обрабатываться reverse proxy до SPA fallback.
 
 При запуске доступны `GET /api/health`, `GET /api/objects` и batch endpoint `/api/ephemerides`. В production те же endpoints находятся под `/cosmic-tracker/api/`. Реальные состояния имеют x/y/z, vx/vy/vz, epoch TDB и UTC, source и coverage. При недоступности Horizons приложение показывает `unavailable` или явно помеченный `offline-cache`.
 
-Проверенный локальный результат для v0.1.2: backend pytest, live Horizons reference test, frontend typecheck/build и Vitest выполняются в CI; ручная browser QA обеих карт включает предел zoom 2000×, центрирование и карточку скорости.
+Проверенный локальный результат для v0.1.3: backend pytest, live Horizons reference test, frontend typecheck/build и Vitest выполняются в CI; ручная browser QA обеих карт включает предел zoom 2000×, центрирование и карточку скорости. Пересчёт km/s → km/h вынесен в тестируемую функцию и умножает значение на 3600.
 
 ## Навигация по документации
 
