@@ -1,4 +1,4 @@
-# PRD: Cosmic Tracker v0.1.2
+# PRD: Cosmic Tracker v0.1.3
 
 ## Цель
 
@@ -16,7 +16,8 @@
 - интерфейс читаем на desktop/mobile;
 - frontend typecheck/build и backend pytest проходят локально.
 - карточка объекта показывает heliocentric speed в км/с и км/ч, а также UTC-эпоху значения;
-- документация, CI и release metadata соответствуют v0.1.2.
+- значение скорости в km/h вычисляется как `km/s × 3600`, покрыто отдельными frontend-тестами;
+- документация, CI и release metadata соответствуют v0.1.3.
 
 ## Acceptance scope v1.1
 

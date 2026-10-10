@@ -12,13 +12,14 @@ COSMIC_LIVE_HORIZONS=1 PYTHONPATH=backend backend/.venv/bin/pytest -q backend/te
 
 CI выполняет frontend typecheck, Vitest, production build и backend pytest на push/pull request.
 
-## Покрытие
+## Покрытие v0.1.3
 
 - Backend: parser Horizons, нормы и расстояния, healthcheck, ограничения запроса, simulated Horizons failure.
-- Frontend: vector math и Hermite interpolation, sampled точка, отсутствие экстраполяции.
+- Frontend: vector math и Hermite interpolation, sampled точка, отсутствие экстраполяции, пересчёт скорости `km/s → km/h` с коэффициентом 3600 и округлением только отображаемого значения.
 - Live regression: Earth на 2025-01-01, 2026-01-01 и 2027-01-01 с допуском 1 km для координат; тест отключён без `COSMIC_LIVE_HORIZONS=1`.
 - Browser smoke: обе карты, source statuses, production base, кнопки `125%` и `100%`, переключение режимов, Voyager 1 и Parker Solar Probe; CSS/pointer contract проверен для мобильной ширины.
 - Scientific QA: TDB→UTC conversion and explicit coverage classification use fixed unit tests plus live Horizons references.
+- Speed regression: `29.84 km/s = 107424 km/h`, а также `0`, `1`, `11.2` и дробное значение с проверкой округления.
 
 ## Ручная проверка
 
