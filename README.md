@@ -1,4 +1,4 @@
-# Cosmic Tracker
+# Cosmic Tracker MVP v0.1.1
 
 Научно корректный русскоязычный атлас Солнечной системы и дальнего космоса. Положения планет и аппаратов получаются из NASA/JPL Horizons; интерфейс не подменяет эфемериды декоративной анимацией.
 
@@ -51,7 +51,7 @@ API_PREFIX=/cosmic-tracker/api uvicorn backend.app.main:app --host 127.0.0.1 --p
 
 При недоступности сети приложение показывает ошибку. Зафиксированные fixtures используются только в тестах и обозначены как offline.
 
-Примеры локальной проверки интерфейса: [Солнечная система](screenshots/solar-system-live.png) и [Дальний космос с Voyager 1](screenshots/deep-space-voyager1.png).
+Примеры локальной проверки интерфейса: [Солнечная система](screenshots/solar-system-live.png) и [Дальний космос](screenshots/deep-space-live.png).
 
 ## Обновление и откат
 
@@ -63,4 +63,8 @@ Cosmic Tracker разделён на React/Vite frontend, FastAPI backend, vecto
 
 При запуске доступны `GET /api/health`, `GET /api/objects` и batch endpoint `/api/ephemerides`. В production те же endpoints находятся под `/cosmic-tracker/api/`. Реальные состояния имеют x/y/z, vx/vy/vz, epoch TDB, source и coverage. При недоступности Horizons приложение показывает `unavailable` или явно помеченный `offline-cache`.
 
-Проверенный локальный результат: backend pytest `3 passed`, frontend typecheck/build, Vitest `2 passed`, live smoke для Earth/Parker/Voyager 1 и ручная browser QA обеих карт. История изменений — в [CHANGELOG.md](CHANGELOG.md).
+Проверенный локальный результат для v0.1.1: backend pytest `5 passed, 1 skipped`, live Horizons reference test `1 passed`, frontend typecheck/build и Vitest `4 passed`, ручная browser QA обеих карт. История изменений — в [CHANGELOG.md](CHANGELOG.md).
+
+## Навигация по документации
+
+Публичная структура будущего раздела `/cosmic-tracker/docs/` описана в [docs/README.md](docs/README.md). Для разработки и эксплуатации используйте [руководство пользователя](docs/USER_GUIDE.md), [методы расчёта](docs/SCIENTIFIC_METHODS.md), [API](docs/API.md), [тестирование](docs/TESTING.md) и [deployment runbook](docs/DEPLOYMENT.md). ADR находятся в [docs/DECISIONS/](docs/DECISIONS/).

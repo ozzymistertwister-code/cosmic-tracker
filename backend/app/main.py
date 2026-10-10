@@ -14,7 +14,7 @@ from app.cache import EphemerisCache
 API_PREFIX = os.getenv("API_PREFIX", "/api").rstrip("/")
 CACHE_PATH = os.getenv("EPHEMERIS_CACHE", str(Path(__file__).parents[1] / "data" / "ephemerides.sqlite3"))
 cache = EphemerisCache(CACHE_PATH)
-app = FastAPI(title="Cosmic Tracker API", version="0.1.0", root_path="")
+app = FastAPI(title="Cosmic Tracker API", version="0.1.1", root_path="")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_methods=["GET"], allow_headers=["*"])
 
 CATALOG = {

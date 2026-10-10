@@ -13,11 +13,13 @@
 - Добавлены production prefixes `/cosmic-tracker/` и `/cosmic-tracker/api/`.
 - Добавлены тесты, CI, screenshots и документация.
 
-## [Unreleased]
+## [0.1.1] — 2026-10-10
 
 - Стабилизирован Canvas: state-driven render без synthetic resize, Retina bitmap, zoom/pan/pinch, клавиатура и кнопки масштаба 100%.
 - Добавлена Hermite-интерполяция state vectors, явные sampled/hermite метаданные и оценка ошибки; временная шкала больше не запрашивает NASA на каждый кадр.
 - Добавлены bounded API-запросы, статусы по объектам и тесты NASA timeout/ограничений.
 - Обновлены acceptance screenshots после браузерной smoke-проверки обеих карт и проверены zoom 125%/100%.
 - Добавлен опциональный live-регрессионный тест Earth на трёх фиксированных эпохах Horizons.
+## [Unreleased]
+
 - Планируется cross-check через SPICE, расширение каталога и дальнейшая подготовка к VPS deployment.

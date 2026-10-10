@@ -29,6 +29,10 @@ Suggested: frontend React + Vite + TypeScript + Canvas 2D; backend Python + Fast
 ## Agent responses
 Respond in **Russian**. Work sequentially, not parallel migrations/builds. At every checkpoint report: exact repository/worktree, work completed, files changed, tests actually executed, LIVE/CACHED/OFFLINE/UNAVAILABLE data status, blockers and next action. Never claim tests passed unless they were run. For the first session, **audit only**, report, and request approval for bootstrap.
 
+## Permanent Git and documentation standard
+
+Любое изменение кода должно сопровождаться проверкой актуальности тестов и документации. Для каждой задачи соблюдать порядок: реализация → тестирование → обновление затронутых документов → обновление `CHANGELOG.md` для значимых изменений → Conventional Commit → push в согласованную рабочую ветку → обновление PR. Версии и требования в коде, PRD, README и остальных документах не должны расходиться. Merge в `main`, VPS и production deployment требуют отдельного согласования.
+
 ## Confirmed production target (design only; no deployment authorization)
 - Public URL: https://syst8m.com/cosmic-tracker/
 - Vite base: `/cosmic-tracker/`; backend reverse-proxy prefix: `/cosmic-tracker/api/`. Use an environment-aware API client that works in Vite dev and production.

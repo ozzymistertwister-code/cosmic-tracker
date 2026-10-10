@@ -1,4 +1,4 @@
-# PRD: Cosmic Tracker MVP v0.1
+# PRD: Cosmic Tracker MVP v0.1.1
 
 ## Цель
 
@@ -15,6 +15,7 @@
 - Canvas поддерживает выбор, zoom и pan;
 - интерфейс читаем на desktop/mobile;
 - frontend typecheck/build и backend pytest проходят локально.
+- документация, CI и release metadata соответствуют v0.1.1.
 
 ## Acceptance scope v1.1
 
