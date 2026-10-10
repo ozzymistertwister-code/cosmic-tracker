@@ -1,4 +1,4 @@
-# PRD: Cosmic Tracker MVP v0.1.1
+# PRD: Cosmic Tracker v0.1.2
 
 ## Цель
 
@@ -12,10 +12,11 @@
 
 - live-ответы Horizons или явный unavailable/offline-cache;
 - одинаковая эпоха, центр и frame для карты и карточки;
-- Canvas поддерживает выбор, zoom и pan;
+- Canvas поддерживает выбор, zoom и pan; относительный zoom ограничен 2000× от начального вида, есть zoom вокруг курсора/pinch-центра и центрирование выбранного объекта;
 - интерфейс читаем на desktop/mobile;
 - frontend typecheck/build и backend pytest проходят локально.
-- документация, CI и release metadata соответствуют v0.1.1.
+- карточка объекта показывает heliocentric speed в км/с и км/ч, а также UTC-эпоху значения;
+- документация, CI и release metadata соответствуют v0.1.2.
 
 ## Acceptance scope v1.1
 

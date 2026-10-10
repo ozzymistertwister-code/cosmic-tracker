@@ -1,6 +1,6 @@
 # Roadmap
 
-## v0.1.1 — текущий MVP
+## v0.1.2 — текущий MVP
 
 - Две 2D-карты на реальных Horizons vectors.
 - SQLite cache, статусы источников, Hermite interpolation.

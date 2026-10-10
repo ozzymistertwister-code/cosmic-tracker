@@ -18,7 +18,7 @@ Canvas имеет отдельное состояние transform (scale/pan), R
 
 ## Контракт и error model
 
-Точка эфемериды содержит `timestamp` (JDTDB), отдельные `epochTdb` и `epochUtc`, x/y/z, vx/vy/vz, `source` и `coverage`. `live` — свежий ответ Horizons; `cached` — свежий SQLite cache; `offline-cache` — stale cache при сбое; `unavailable` — позиция отсутствует и маркер не рисуется.
+Точка эфемериды содержит `timestamp` (JDTDB), отдельные `epochTdb` и `epochUtc`, x/y/z, vx/vy/vz, `source` и `coverage`. `live` — свежий ответ Horizons; `cached` — свежий SQLite cache; `offline-cache` — stale cache при сбое; `unavailable` — позиция отсутствует и маркер не рисуется. Coverage остаётся `unknown`, пока источник не даст явное metadata.
 
 В production Vite собирается с `base=/cosmic-tracker/`; FastAPI запускается с `API_PREFIX=/cosmic-tracker/api`. Reverse proxy направляет API до SPA fallback, иначе healthcheck может вернуть `index.html` вместо JSON.
 

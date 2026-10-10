@@ -2,7 +2,7 @@ import httpx
 from typing import List, Optional
 import asyncio
 from dataclasses import replace
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app.domain import StateVector, parse_horizons_result
 
@@ -14,12 +14,10 @@ class HorizonsError(RuntimeError):
 
 
 def classify_coverage(point: StateVector, now: Optional[datetime] = None) -> str:
-    """Classify a parsed epoch explicitly; parser text is never used as a signal."""
-    if not point.epoch_utc:
-        return "unknown"
-    reference = now or datetime.now(timezone.utc)
-    epoch = datetime.fromisoformat(point.epoch_utc.replace("Z", "+00:00"))
-    return "forecast" if epoch > reference else "reconstructed"
+    """Keep coverage unknown unless the source supplies an explicit coverage flag."""
+    # Horizons VECTORS does not expose a machine-readable reconstructed/forecast
+    # flag in this response. Time direction alone is not evidence of provenance.
+    return "unknown"
 
 
 async def fetch_vectors(target_id: str, start: str, stop: str, step: str = "1 d") -> List[StateVector]:
@@ -42,8 +40,7 @@ async def fetch_vectors(target_id: str, start: str, stop: str, step: str = "1 d"
     if "error" in body or "result" not in body:
         raise HorizonsError(str(body.get("message", "Horizons returned no result")))
     points = parse_horizons_result(body["result"], "NASA/JPL Horizons")
-    now = datetime.now(timezone.utc)
-    classified = [replace(point, coverage=classify_coverage(point, now)) for point in points]
+    classified = [replace(point, coverage=classify_coverage(point)) for point in points]
     return classified
 
 

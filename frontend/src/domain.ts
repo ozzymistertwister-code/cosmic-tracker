@@ -24,6 +24,7 @@ export type EphemerisResponse = {
 
 export const AU_KM = 149_597_870.7
 export const norm = (v: Vector) => Math.sqrt(v.x ** 2 + v.y ** 2 + v.z ** 2)
+export const speedKmH = (v: StateVector) => norm({ x: v.vx, y: v.vy, z: v.vz }) * 3600
 export const distance = (a: Vector, b: Vector) => norm({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z })
 
 export const catalog: SpaceObject[] = [

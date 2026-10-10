@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type WheelEvent } from 'react'
 import type { Mode, SpaceObject } from './domain'
 import { AU_KM } from './domain'
+import { clampScale, initialScale, zoomPercentage } from './mapView'
 
 type Props = { mode: Mode; objects: SpaceObject[]; selected: string; onSelect: (id: string) => void; loading: boolean }
 type Point = { x: number; y: number; id: string; radius: number }
 type View = { scale: number; panX: number; panY: number }
 type ActivePointer = { x: number; y: number }
-
-const initialScale = (mode: Mode) => mode === 'deep' ? 1.7 : 15
-const clampScale = (scale: number) => Math.max(.15, Math.min(90, scale))
 
 export function MapCanvas({ mode, objects, selected, onSelect, loading }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -20,7 +18,21 @@ export function MapCanvas({ mode, objects, selected, onSelect, loading }: Props)
   const pinchStart = useRef<{ distance: number; center: ActivePointer; scale: number; panX: number; panY: number } | null>(null)
 
   const resetView = useCallback(() => setView({ scale: initialScale(mode), panX: 0, panY: 0 }), [mode])
-  const zoom = useCallback((factor: number) => setView((current) => ({ ...current, scale: clampScale(current.scale * factor) })), [])
+  const zoomAt = useCallback((factor: number, anchor?: ActivePointer) => setView((current) => {
+    const canvas = canvasRef.current
+    const rect = canvas?.getBoundingClientRect()
+    const center = { x: (rect?.width ?? 0) / 2, y: (rect?.height ?? 0) / 2 }
+    const point = anchor ?? center
+    const nextScale = clampScale(mode, current.scale * factor)
+    const worldX = (point.x - center.x - current.panX) / current.scale
+    const worldY = (point.y - center.y - current.panY) / current.scale
+    return { scale: nextScale, panX: point.x - center.x - worldX * nextScale, panY: point.y - center.y - worldY * nextScale }
+  }), [mode])
+  const centerSelected = useCallback(() => {
+    const object = objects.find((item) => item.id === selected)
+    if (!object?.data) return
+    setView((current) => ({ ...current, panX: -object.data!.x / AU_KM * current.scale, panY: object.data!.y / AU_KM * current.scale }))
+  }, [objects, selected])
 
   useEffect(() => { setView({ scale: initialScale(mode), panX: 0, panY: 0 }) }, [mode])
 
@@ -33,6 +45,7 @@ export function MapCanvas({ mode, objects, selected, onSelect, loading }: Props)
     gradient.addColorStop(0, '#112331'); gradient.addColorStop(1, '#071019'); context.fillStyle = gradient; context.fillRect(0, 0, w, h)
     const cx = w / 2 + view.panX; const cy = h / 2 + view.panY
     const toScreen = (x: number, y: number) => ({ x: cx + x / AU_KM * view.scale, y: cy - y / AU_KM * view.scale })
+    const visible = (x: number, y: number, margin = 80) => x >= -margin && x <= w + margin && y >= -margin && y <= h + margin
     context.strokeStyle = 'rgba(139, 183, 204, .10)'; context.lineWidth = 1
     for (let i = -10; i <= 10; i++) { const gx = cx + i * (mode === 'deep' ? 50 : 40); const gy = cy + i * (mode === 'deep' ? 50 : 40); context.beginPath(); context.moveTo(gx, 0); context.lineTo(gx, h); context.stroke(); context.beginPath(); context.moveTo(0, gy); context.lineTo(w, gy); context.stroke() }
     const max = mode === 'deep' ? 250 : 32
@@ -42,10 +55,16 @@ export function MapCanvas({ mode, objects, selected, onSelect, loading }: Props)
     objects.filter((object) => object.mode.includes(mode) && object.data).forEach((object) => {
       const data = object.data!; const screen = toScreen(data.x, data.y); const radius = object.kind === 'planet' ? 4.5 : object.kind === 'sun' ? 9 : 6.5
       const trajectory = data.path
-      if (trajectory && trajectory.length > 1) { context.beginPath(); trajectory.forEach((p, i) => { const q = toScreen(p.x, p.y); i ? context.lineTo(q.x, q.y) : context.moveTo(q.x, q.y) }); context.strokeStyle = `${object.color}55`; context.lineWidth = object.id === selected ? 2 : 1; context.stroke() }
+      if (trajectory && trajectory.length > 1) {
+        context.beginPath(); let drawing = false
+        trajectory.forEach((p) => { const q = toScreen(p.x, p.y); if (visible(q.x, q.y)) { drawing ? context.lineTo(q.x, q.y) : context.moveTo(q.x, q.y); drawing = true } else drawing = false })
+        context.strokeStyle = `${object.color}55`; context.lineWidth = object.id === selected ? 2 : 1; context.stroke()
+      }
+      if (!visible(screen.x, screen.y)) return
       if (object.id === selected) { context.beginPath(); context.arc(screen.x, screen.y, radius + 8, 0, Math.PI * 2); context.strokeStyle = object.color; context.lineWidth = 1; context.stroke() }
       context.beginPath(); context.arc(screen.x, screen.y, radius, 0, Math.PI * 2); context.fillStyle = object.color; context.shadowColor = object.color; context.shadowBlur = object.kind === 'sun' ? 20 : 8; context.fill(); context.shadowBlur = 0
       context.font = object.id === selected ? '600 12px IBM Plex Sans, sans-serif' : '11px IBM Plex Sans, sans-serif'; context.fillStyle = object.id === selected ? '#f4fbff' : '#b7ccd4'; context.fillText(object.shortName, screen.x + radius + 5, screen.y + 4)
+      if (object.id === selected) { const speed = Math.sqrt(data.vx ** 2 + data.vy ** 2 + data.vz ** 2); context.font = '10px IBM Plex Mono, monospace'; context.fillStyle = '#f3c76b'; context.fillText(`${speed.toFixed(2)} км/с`, screen.x + radius + 5, screen.y + 19) }
       points.current.push({ x: screen.x, y: screen.y, id: object.id, radius: radius + 9 })
     })
     context.fillStyle = '#f3c76b'; context.font = '11px IBM Plex Mono, monospace'; context.fillText(mode === 'deep' ? 'Гелиоцентрическая проекция · линейная шкала AU' : 'Гелиоцентрическая проекция · эклиптика J2000', 20, h - 20)
@@ -67,13 +86,13 @@ export function MapCanvas({ mode, objects, selected, onSelect, loading }: Props)
   const pointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
     if (!activePointers.current.has(event.pointerId)) return
     activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
-    if (activePointers.current.size >= 2 && pinchStart.current) { const [a, b] = [...activePointers.current.values()]; const center = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; const distance = Math.hypot(a.x - b.x, a.y - b.y); const pinch = pinchStart.current; if (Math.abs(distance - pinch.distance) > 2) suppressClick.current = true; setView({ scale: clampScale(pinch.scale * distance / pinch.distance), panX: pinch.panX + center.x - pinch.center.x, panY: pinch.panY + center.y - pinch.center.y }); return }
+    if (activePointers.current.size >= 2 && pinchStart.current) { const [a, b] = [...activePointers.current.values()]; const center = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; const distance = Math.hypot(a.x - b.x, a.y - b.y); const pinch = pinchStart.current; if (Math.abs(distance - pinch.distance) > 2) suppressClick.current = true; const rect = event.currentTarget.getBoundingClientRect(); const canvasCenter = { x: rect.width / 2, y: rect.height / 2 }; const nextScale = clampScale(mode, pinch.scale * distance / pinch.distance); const worldX = (pinch.center.x - rect.left - canvasCenter.x - pinch.panX) / pinch.scale; const worldY = (pinch.center.y - rect.top - canvasCenter.y - pinch.panY) / pinch.scale; setView({ scale: nextScale, panX: center.x - rect.left - canvasCenter.x - worldX * nextScale, panY: center.y - rect.top - canvasCenter.y - worldY * nextScale }); return }
     if (activePointers.current.size === 1 && lastPointer.current) { const dx = event.clientX - lastPointer.current.x; const dy = event.clientY - lastPointer.current.y; if (Math.hypot(dx, dy) > 2) suppressClick.current = true; setView((current) => ({ ...current, panX: current.panX + dx, panY: current.panY + dy })); lastPointer.current = { x: event.clientX, y: event.clientY } }
   }
   const pointerUp = (event: PointerEvent<HTMLCanvasElement>) => { activePointers.current.delete(event.pointerId); pinchStart.current = null; lastPointer.current = [...activePointers.current.values()][0] ?? null }
   const click = (event: MouseEvent<HTMLCanvasElement>) => { if (suppressClick.current) { suppressClick.current = false; return }; const rect = event.currentTarget.getBoundingClientRect(); const x = event.clientX - rect.left; const y = event.clientY - rect.top; const hit = points.current.find((point) => Math.hypot(point.x - x, point.y - y) < point.radius); if (hit) onSelect(hit.id) }
-  const wheel = (event: WheelEvent<HTMLCanvasElement>) => { event.preventDefault(); zoom(event.deltaY > 0 ? .8 : 1.25) }
-  const keyDown = (event: KeyboardEvent<HTMLCanvasElement>) => { if (event.key === '+' || event.key === '=') { event.preventDefault(); zoom(1.25) } else if (event.key === '-') { event.preventDefault(); zoom(.8) } else if (event.key === '0') { event.preventDefault(); resetView() } else if (event.key.startsWith('Arrow')) { event.preventDefault(); const delta = event.shiftKey ? 40 : 18; setView((current) => ({ ...current, panX: current.panX + (event.key === 'ArrowRight' ? delta : event.key === 'ArrowLeft' ? -delta : 0), panY: current.panY + (event.key === 'ArrowDown' ? delta : event.key === 'ArrowUp' ? -delta : 0) })) } }
-  const percentage = Math.round(view.scale / initialScale(mode) * 100)
-  return <div className="map-canvas-shell"><canvas ref={canvasRef} className="map-canvas" tabIndex={0} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onClick={click} onWheel={wheel} onKeyDown={keyDown} aria-label="Интерактивная карта эфемерид: стрелки — панорама, плюс/минус — масштаб" /><div className="map-zoom-controls" aria-label="Управление масштабом карты"><button type="button" onClick={() => zoom(1.25)} aria-label="Увеличить масштаб">⌕<span>+</span></button><button type="button" onClick={() => zoom(.8)} aria-label="Уменьшить масштаб">⌕<span>−</span></button><output aria-live="polite">{percentage}%</output><button type="button" onClick={resetView} aria-label="Восстановить масштаб и центрирование">100%</button></div></div>
+  const wheel = (event: WheelEvent<HTMLCanvasElement>) => { event.preventDefault(); const rect = event.currentTarget.getBoundingClientRect(); zoomAt(event.deltaY > 0 ? .8 : 1.25, { x: event.clientX - rect.left, y: event.clientY - rect.top }) }
+  const keyDown = (event: KeyboardEvent<HTMLCanvasElement>) => { if (event.key === '+' || event.key === '=') { event.preventDefault(); zoomAt(1.25) } else if (event.key === '-') { event.preventDefault(); zoomAt(.8) } else if (event.key === '0') { event.preventDefault(); resetView() } else if (event.key === 'c') { event.preventDefault(); centerSelected() } else if (event.key.startsWith('Arrow')) { event.preventDefault(); const delta = event.shiftKey ? 40 : 18; setView((current) => ({ ...current, panX: current.panX + (event.key === 'ArrowRight' ? delta : event.key === 'ArrowLeft' ? -delta : 0), panY: current.panY + (event.key === 'ArrowDown' ? delta : event.key === 'ArrowUp' ? -delta : 0) })) } }
+  const percentage = zoomPercentage(mode, view.scale)
+  return <div className="map-canvas-shell"><canvas ref={canvasRef} className="map-canvas" tabIndex={0} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onClick={click} onWheel={wheel} onKeyDown={keyDown} aria-label="Интерактивная карта эфемерид: стрелки — панорама, плюс/минус — масштаб" /><div className="map-zoom-controls" aria-label="Управление масштабом карты"><button type="button" onClick={() => zoomAt(1.25)} aria-label="Увеличить масштаб">⌕<span>+</span></button><button type="button" onClick={() => zoomAt(.8)} aria-label="Уменьшить масштаб">⌕<span>−</span></button><output aria-live="polite">{percentage}%</output><button type="button" onClick={resetView} aria-label="Восстановить масштаб и центрирование">100%</button><button type="button" onClick={centerSelected} aria-label="Центрировать выбранный объект">⊙</button></div></div>
 }

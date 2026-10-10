@@ -1,4 +1,4 @@
-# Cosmic Tracker MVP v0.1.1
+# Cosmic Tracker v0.1.2
 
 Научно корректный русскоязычный атлас Солнечной системы и дальнего космоса. Положения планет и аппаратов получаются из NASA/JPL Horizons; интерфейс не подменяет эфемериды декоративной анимацией.
 
@@ -47,7 +47,7 @@ API_PREFIX=/cosmic-tracker/api uvicorn backend.app.main:app --host 127.0.0.1 --p
 
 ## Научные оговорки
 
-Координаты — гелиоцентрические, эклиптика J2000, единицы km и km/s, временная шкала UI — UTC. На Canvas показываются x/y, но API и доменная модель сохраняют z и все компоненты скорости. Для Voyager/New Horizons Horizons использует реконструированные и прогнозные участки; это отображается как `forecast`.
+Координаты — гелиоцентрические, эклиптика J2000, единицы km и km/s, временная шкала UI — UTC. На Canvas показываются x/y, но API и доменная модель сохраняют z и все компоненты скорости. Coverage остаётся `unknown`, если NASA не передала явную метаинформацию о происхождении точки.
 
 При недоступности сети приложение показывает ошибку. Зафиксированные fixtures используются только в тестах и обозначены как offline. Coverage parser не выводит из текста Horizons: неизвестное значение остаётся `unknown`, а адаптер классифицирует эпоху явно относительно UTC.
 
@@ -57,13 +57,13 @@ API_PREFIX=/cosmic-tracker/api uvicorn backend.app.main:app --host 127.0.0.1 --p
 
 VPS в этот этап не входит. Runbook для будущей публикации находится в `docs/DEPLOYMENT.md`: versioned release, healthcheck, smoke-проверка и переключение symlink с возможностью rollback.
 
-## Инженерный стандарт MVP v0.1
+## Инженерный стандарт v0.1.2
 
 Cosmic Tracker разделён на React/Vite frontend, FastAPI backend, vector domain, Horizons adapter и SQLite cache. Frontend использует `base=/cosmic-tracker/`, backend — `API_PREFIX=/cosmic-tracker/api`; API должен обрабатываться reverse proxy до SPA fallback.
 
 При запуске доступны `GET /api/health`, `GET /api/objects` и batch endpoint `/api/ephemerides`. В production те же endpoints находятся под `/cosmic-tracker/api/`. Реальные состояния имеют x/y/z, vx/vy/vz, epoch TDB и UTC, source и coverage. При недоступности Horizons приложение показывает `unavailable` или явно помеченный `offline-cache`.
 
-Проверенный локальный результат для v0.1.1: backend pytest `7 passed, 1 skipped`, live Horizons reference test `1 passed`, frontend typecheck/build и Vitest `4 passed`, ручная browser QA обеих карт. История изменений — в [CHANGELOG.md](CHANGELOG.md).
+Проверенный локальный результат для v0.1.2: backend pytest, live Horizons reference test, frontend typecheck/build и Vitest выполняются в CI; ручная browser QA обеих карт включает предел zoom 2000×, центрирование и карточку скорости.
 
 ## Навигация по документации
 

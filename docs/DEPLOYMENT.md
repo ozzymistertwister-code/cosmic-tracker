@@ -10,7 +10,7 @@
 
 1. Выполнить read-only inventory VPS и убедиться, что существующие маршруты/порты не конфликтуют.
 2. Собрать frontend с `npm ci && npm run check && npm run test -- --run && npm run build`; установить backend из pinned requirements.
-3. Создать резервную копию текущего `current` и SQLite cache, затем распаковать новый `releases/0.1.1/`.
+3. Создать резервную копию текущего `current` и SQLite cache, затем распаковать новый `releases/0.1.2/`.
 4. Запустить backend с `API_PREFIX=/cosmic-tracker/api`, проверить JSON healthcheck и отдельный запрос эфемерид.
 5. Проверить `/cosmic-tracker/`, статические assets, refresh и `/cosmic-tracker/api/health`; только после этого атомарно переключить `current`.
 6. Сохранить release metadata, логи и результат smoke-проверки.

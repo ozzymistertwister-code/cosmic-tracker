@@ -1,4 +1,4 @@
-# API Cosmic Tracker v0.1.1
+# API Cosmic Tracker v0.1.2
 
 В разработке endpoint доступен под `/api/`; в production reverse proxy публикует его под `/cosmic-tracker/api/`. Все ответы JSON. CORS разрешён только для localhost frontend.
 
