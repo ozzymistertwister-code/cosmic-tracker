@@ -15,3 +15,9 @@
 
 Ответ API хранит `timestamp`, x/y/z, vx/vy/vz, `source`, `coverage`, generated time и cache status. Временная шкала приложения UTC; Horizons сообщает эпохи TDB в текстовом блоке.
 
+## SPICE и ограничения
+
+NAIF [SPICE](https://naif.jpl.nasa.gov/naif/index.html) и ESA [SPICE kernels](https://spiftp.esac.esa.int/data/SPICE/) оставлены для последующей cross-check-проверки и плотных участков. В MVP они не скачиваются автоматически и не подменяют Horizons.
+
+Вычисления: `distance = norm(position)`, `speed = norm(velocity)`, расстояние до Земли — норма разности одновременных heliocentric position vectors. 2D Canvas показывает x/y, но z и все velocity components сохраняются. Voyager/New Horizons имеют прогнозные участки; Parker speed не следует интерпретировать как historical peak.
+

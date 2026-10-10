@@ -16,3 +16,9 @@
 - интерфейс читаем на desktop/mobile;
 - frontend typecheck/build и backend pytest проходят локально.
 
+## Acceptance scope v1.1
+
+«Солнечная система» использует Солнце, 8 планет и Parker Solar Probe; «Дальний космос» — Voyager 1, Voyager 2 и New Horizons на линейной шкале 0–250 а.е. Оба режима используют один epoch, origin, units и state-vector model. Карточка показывает x/y/z, heliocentric speed, расстояния до Солнца/Земли, source и coverage.
+
+В MVP не входят звёздная карта в световых годах, 3D, CelesTrak, автоматические плановые траектории и VPS deployment.
+

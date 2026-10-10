@@ -1,11 +1,13 @@
 # COSMIC TRACKER — мастер-постановка для ORCA / Codex
 
-**Версия:** 1.0  
+**Версия:** 1.1
 **Дата:** 10 октября 2026  
 **Репозиторий:** `ozzymistertwister-code/cosmic-tracker`  
 **Рабочий worktree ORCA (подтверждён диагностикой):** `/Users/alexarlovsky/orca/workspaces/cosmic-tracker/flounder`  
 **Запуск агента:** ORCA на Local Mac, агент Codex, существующая изолированная ветка ORCA `ozzymistertwister-code/flounder` (не переключать без необходимости)  
 **Продукт:** самостоятельное веб-приложение Cosmic Tracker, язык интерфейса русский.
+
+**Изменения версии 1.1:** зафиксированы production-префиксы `/cosmic-tracker/` и `/cosmic-tracker/api/`, SQLite-кэш с TTL и offline-статусами, parser sampled-эфемерид Horizons, обязательные screenshots и локальный CI для MVP.
 
 ## Инструкция агенту
 

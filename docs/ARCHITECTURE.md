@@ -14,3 +14,9 @@ Horizons запрашивается с `CENTER=500@10`, `EPHEM_TYPE=VECTORS`, `V
 
 Кэш ключуется по target, диапазону, шагу и frame. Просроченный кэш не называется live и используется только с `offline-cache`.
 
+## Контракт и error model
+
+Точка эфемериды содержит `timestamp` (JDTDB), `epochTdb`, x/y/z, vx/vy/vz, `source` и `coverage`. `live` — свежий ответ Horizons; `cached` — свежий SQLite cache; `offline-cache` — stale cache при сбое; `unavailable` — позиция отсутствует и маркер не рисуется.
+
+В production Vite собирается с `base=/cosmic-tracker/`; FastAPI запускается с `API_PREFIX=/cosmic-tracker/api`. Reverse proxy направляет API до SPA fallback, иначе healthcheck может вернуть `index.html` вместо JSON.
+

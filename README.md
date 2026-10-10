@@ -56,3 +56,11 @@ API_PREFIX=/cosmic-tracker/api uvicorn backend.app.main:app --host 127.0.0.1 --p
 ## Обновление и откат
 
 VPS в этот этап не входит. Runbook для будущей публикации находится в `docs/DEPLOYMENT.md`: versioned release, healthcheck, smoke-проверка и переключение symlink с возможностью rollback.
+
+## Инженерный стандарт MVP v0.1
+
+Cosmic Tracker разделён на React/Vite frontend, FastAPI backend, vector domain, Horizons adapter и SQLite cache. Frontend использует `base=/cosmic-tracker/`, backend — `API_PREFIX=/cosmic-tracker/api`; API должен обрабатываться reverse proxy до SPA fallback.
+
+При запуске доступны `GET /api/health`, `GET /api/objects` и batch endpoint `/api/ephemerides`. В production те же endpoints находятся под `/cosmic-tracker/api/`. Реальные состояния имеют x/y/z, vx/vy/vz, epoch TDB, source и coverage. При недоступности Horizons приложение показывает `unavailable` или явно помеченный `offline-cache`.
+
+Проверенный локальный результат: backend pytest `3 passed`, frontend typecheck/build, Vitest `2 passed`, live smoke для Earth/Parker/Voyager 1 и ручная browser QA обеих карт. История изменений — в [CHANGELOG.md](CHANGELOG.md).
