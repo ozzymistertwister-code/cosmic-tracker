@@ -2,12 +2,19 @@ export type Mode = 'solar' | 'deep'
 
 export type Vector = { x: number; y: number; z: number }
 export type StateVector = Vector & { vx: number; vy: number; vz: number }
-export type EphemerisPoint = StateVector & { timestamp: string; epoch?: number; epochTdb?: string; source: string; coverage: string; path?: Array<{ x: number; y: number }> }
+export type EphemerisPoint = StateVector & {
+  timestamp: string; epoch?: number; epochTdb?: string; source: string; coverage: string;
+  path?: Array<{ x: number; y: number }>;
+  interpolation?: 'sampled' | 'hermite';
+  requestedEpochUtc?: string;
+  bracketEpochTdb?: [string, string];
+  interpolationErrorKm?: number;
+}
 
 export type SpaceObject = {
   id: string; name: string; shortName: string; kind: 'planet' | 'spacecraft' | 'sun';
   targetId: string; agency: string; launchYear?: number; status: string; mission: string;
-  color: string; mode: Mode[]; sourceUrl: string; data?: EphemerisPoint; error?: string;
+  color: string; mode: Mode[]; sourceUrl: string; data?: EphemerisPoint; error?: string; sourceStatus?: string;
 }
 
 export type EphemerisResponse = {

@@ -5,7 +5,7 @@ Frontend и backend разделены. `frontend/src/domain.ts` содержи�
 ```text
 React/Vite → relative API client → FastAPI → SQLite cache → NASA Horizons
                   ↓
-             Canvas renderer
+             Canvas renderer + Hermite interpolation
 ```
 
 Production base: `/cosmic-tracker/`; API: `/cosmic-tracker/api/`. В dev Vite proxy использует `/api`.
@@ -13,6 +13,8 @@ Production base: `/cosmic-tracker/`; API: `/cosmic-tracker/api/`. В dev Vite pr
 Horizons запрашивается с `CENTER=500@10`, `EPHEM_TYPE=VECTORS`, `VEC_TABLE=2`, `REF_PLANE=ECLIPTIC`, `OUT_UNITS=KM-S`, `VEC_CORR=NONE`. Все шесть компонент состояния сохраняются. Canvas проецирует только x/y.
 
 Кэш ключуется по target, диапазону, шагу и frame. Просроченный кэш не называется live и используется только с `offline-cache`.
+
+Canvas имеет отдельное состояние transform (scale/pan), ResizeObserver только синхронизирует физический Retina-размер bitmap, а render запускается от React state. Pointer Events поддерживают pan одним пальцем и pinch двумя; клавиатура использует `+`, `-`, `0` и стрелки. Выбор объекта подавляется после фактического перемещения указателя.
 
 ## Контракт и error model
 

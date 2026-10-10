@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -21,6 +21,9 @@ CATALOG = {
     "sun": "10", "mercury": "199", "venus": "299", "earth": "399", "mars": "499", "jupiter": "599", "saturn": "699", "uranus": "799", "neptune": "899",
     "parker": "-96", "voyager1": "-31", "voyager2": "-32", "new-horizons": "-98", "juice": "-28", "europa-clipper": "-159",
 }
+MAX_OBJECTS_PER_REQUEST = 12
+MAX_RANGE_DAYS = 8000
+ALLOWED_STEPS = {"1 d", "10 d", "30 d", "180 d"}
 
 
 def route(path: str) -> str:
@@ -42,6 +45,13 @@ async def ephemerides(ids: str = Query(...), start: Optional[str] = None, end: O
     epoch = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) if not start else datetime.fromisoformat(start.replace("Z", "+00:00"))
     stop = datetime.fromisoformat(end.replace("Z", "+00:00")) if end else epoch + timedelta(days=1)
     requested = [item.strip() for item in ids.split(",") if item.strip()]
+    if not requested or len(requested) > MAX_OBJECTS_PER_REQUEST:
+        raise HTTPException(status_code=400, detail=f"Request must contain 1-{MAX_OBJECTS_PER_REQUEST} objects")
+    if step not in ALLOWED_STEPS:
+        raise HTTPException(status_code=400, detail=f"Unsupported step; use one of {sorted(ALLOWED_STEPS)}")
+    span_days = (stop - epoch).total_seconds() / 86400
+    if span_days <= 0 or span_days > MAX_RANGE_DAYS:
+        raise HTTPException(status_code=400, detail=f"Date range must be between 0 and {MAX_RANGE_DAYS} days")
     output: dict[str, dict] = {}
     limiter = asyncio.Semaphore(3)
     async def one(object_id: str) -> None:

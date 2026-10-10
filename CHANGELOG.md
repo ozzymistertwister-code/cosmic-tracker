@@ -15,4 +15,7 @@
 
 ## [Unreleased]
 
+- Стабилизирован Canvas: state-driven render без synthetic resize, Retina bitmap, zoom/pan/pinch, клавиатура и кнопки масштаба 100%.
+- Добавлена Hermite-интерполяция state vectors, явные sampled/hermite метаданные и оценка ошибки; временная шкала больше не запрашивает NASA на каждый кадр.
+- Добавлены bounded API-запросы, статусы по объектам и тесты NASA timeout/ограничений.
 - Планируется cross-check через SPICE, расширение каталога и дальнейшая подготовка к VPS deployment.
